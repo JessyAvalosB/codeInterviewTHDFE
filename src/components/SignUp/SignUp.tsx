@@ -1,30 +1,68 @@
-import { AccountCircle } from "@mui/icons-material";
-import { Container, Box, Typography, TextField, FormControlLabel, Checkbox, Button, Grid, Link } from "@mui/material";
+import { useState } from "react";
+import { useSnackbar } from 'notistack';
+import { useNavigate } from "react-router-dom";
+import {
+    AccountCircle,
+    Visibility,
+    VisibilityOff
+} from "@mui/icons-material";
+import {
+    Box,
+    Typography,
+    TextField,
+    Button,
+    Grid,
+    Link,
+    InputAdornment,
+    IconButton
+} from "@mui/material";
+
+import { register } from '../../services/auth'
 
 const SignUp = () => {
+    const navigate = useNavigate();
+    const { enqueueSnackbar } = useSnackbar();
+    const [processing, setProcessing] = useState(false);
+    const [passwordVisibility, setPasswordVisibility] = useState(false);
+    const [passwordComfVisibility, setPasswordComfVisibility] = useState(false);
 
-    const handleSubmit = (event: { preventDefault: () => void; currentTarget: HTMLFormElement | undefined; }) => {
+    const handleSubmit = async (event: { preventDefault: () => void; currentTarget: HTMLFormElement | undefined; }) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            name: data.get('name'),
-            lastName: data.get('lastName'),
-            email: data.get("email"),
-            password: data.get("password"),
-            passwordComfirmation: data.get("passwordComfirmation"),
-        });
+        const formData = new FormData(event.currentTarget);
+        const user = {
+            name: formData.get('name')?.toString(),
+            email: formData.get("email")?.toString(),
+            password: formData.get("password")?.toString(),
+            passwordComfirmation: formData.get("passwordComfirmation")?.toString(),
+        }
+
+        if (user.name && user.email && user.password && user.passwordComfirmation) {
+            if (user.password === user.passwordComfirmation) {
+                setProcessing(true)
+                try {
+                    const { status, message, delay } = await register(user.name, user.email, user.password);
+                    setProcessing(false);
+                    if (status) {
+                        navigate('/');
+                        enqueueSnackbar(message, { variant: 'success', autoHideDuration: delay });
+                    } else {
+                        enqueueSnackbar(message, { variant: "error", autoHideDuration: delay });
+                    }
+                } catch (err) {
+                    setProcessing(false);
+                    enqueueSnackbar('Something went wrong.', { variant: 'error', autoHideDuration: 3000 });
+                }
+            } else {
+                enqueueSnackbar("Password and Password Comfirmation doesn't match.", { variant: "error", autoHideDuration: 3000 });
+            }
+        } else {
+            enqueueSnackbar("All fields are required.", { variant: "error", autoHideDuration: 3000 });
+        }
     };
 
     return (
-        <Container component="main" maxWidth="xs">
-            <Box
-                sx={{
-                    marginTop: 40,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                }}
-            >
+        <Grid sx={{ mt: 10 }} container className="page-container">
+            <Grid item md={4} sm={6} xs={11} className="page-block">
                 <AccountCircle fontSize="large" />
                 <Typography component="h1" variant="h5">
                     Sign up
@@ -44,15 +82,6 @@ const SignUp = () => {
                         margin="normal"
                         required
                         fullWidth
-                        id="lastName"
-                        label="Last Name"
-                        name="lastName"
-                        autoComplete="lastName"
-                    />
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
                         id="email"
                         label="Email Address"
                         name="email"
@@ -64,9 +93,18 @@ const SignUp = () => {
                         fullWidth
                         name="password"
                         label="Password"
-                        type="password"
+                        type={passwordVisibility ? "text" : "password"}
                         id="password"
-                        autoComplete="current-password"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton edge="end"
+                                        onClick={() => setPasswordVisibility(!passwordVisibility)} >
+                                        {passwordVisibility ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                     <TextField
                         margin="normal"
@@ -74,12 +112,18 @@ const SignUp = () => {
                         fullWidth
                         id="passwordComfirmation"
                         label="Comfirm Password"
-                        type="password"
+                        type={passwordComfVisibility ? "text" : "password"}
                         name="passwordComfirmation"
-                    />
-                    <FormControlLabel
-                        control={<Checkbox value="remember" color="primary" />}
-                        label="Remember me"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton edge="end"
+                                        onClick={() => setPasswordComfVisibility(!passwordComfVisibility)} >
+                                        {passwordComfVisibility ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                     <Button
                         type="submit"
@@ -87,18 +131,18 @@ const SignUp = () => {
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
                     >
-                        Sign Up
+                        {processing ? "Processing..." : "Sign Up"}
                     </Button>
                     <Grid container justifyContent='start'>
                         <Grid item>
-                            <Link href="#" variant="body2">
+                            <Link href="/signIn" variant="body2">
                                 {"Already have an account? Sign In"}
                             </Link>
                         </Grid>
                     </Grid>
                 </Box>
-            </Box>
-        </Container>
+            </Grid>
+        </Grid>
     )
 }
 

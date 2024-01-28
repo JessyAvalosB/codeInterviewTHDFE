@@ -10,8 +10,8 @@ const useFetchPost = (url: string, data: any) => {
         (
             async () => {
                 try {
-                    if (data === undefined || data === null) {
-                        throw new Error;
+                    if (!data) {
+                        throw new Error('There was no data');
                     }
                     setLoading(true);
                     const response = await axios.post(url, data);

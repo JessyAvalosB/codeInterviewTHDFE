@@ -1,17 +1,26 @@
 import { useState } from 'react'
-import { Modal, Box, Typography, Button, TextField, CircularProgress } from '@mui/material'
 import { Add } from '@mui/icons-material';
+import {
+    Modal,
+    Box,
+    Typography,
+    Button,
+    TextField,
+    CircularProgress
+} from '@mui/material';
+
+import { ADD_CAR } from '../../constants';
 import { ICar } from '../../interfaces/Car';
 import useFetchPost from '../../hooks/useFetchPost';
-import { BASE_URL_CARS } from '../../constants';
 
 
 
 const AddCar = () => {
-
     const [newData, setNewData] = useState<ICar>();
     const [open, setOpen] = useState(false);
-    const { response, loading, error } = useFetchPost(`${BASE_URL_CARS}/add`, newData);
+    const { response, loading, error } = useFetchPost(ADD_CAR, newData);
+
+    console.log(response);
 
     if (error) {
         console.log(error)
@@ -59,7 +68,7 @@ const AddCar = () => {
             >
                 <Box sx={style}>
                     {loading && (
-                        <CircularProgress sx={{mx: 'auto'}}/>
+                        <CircularProgress sx={{ mx: 'auto' }} />
                     )}
                     {!loading && (
                         <>

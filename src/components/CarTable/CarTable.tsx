@@ -15,7 +15,7 @@ import { ICar } from "../../interfaces/Car";
 
 const CarTable = ({ cars }: { cars: ICar[] }) => {
     return (
-        <Container sx={{ display: 'flex', flexDirection: 'column', marginTop: 40 }} component='main' maxWidth='lg'>
+        <Container sx={{ display: 'flex', flexDirection: 'column', marginTop: 20 }} component='main' maxWidth='lg'>
             <AddCar />
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
